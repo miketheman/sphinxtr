@@ -102,14 +102,6 @@ class DocTranslator(BaseTranslator):
         self.table = None
         self.tablebody = None
 
-    def depart_row(self, node):
-        if self.previous_spanning_row == 1:
-            self.previous_spanning_row = 0
-            self.body.append('\\\\\n')
-        else:
-            self.body.append('\\\\\n')
-        self.table.rowcount += 1
-
     def depart_literal_block(self, node):
         code = self.verbatim.rstrip('\n')
         lang = self.hlsettingstack[-1][0]
@@ -148,9 +140,8 @@ class DocTranslator(BaseTranslator):
 
     def visit_figure(self, node):
         ids = ''
-        for id in self.next_figure_ids:
+        for id in self.pop_hyperlink_ids('figure'):
             ids += self.hypertarget(id, anchor=False)
-        self.next_figure_ids.clear()
         if 'width' in node and node.get('align', '') in ('left', 'right'):
             self.body.append('\\begin{wrapfigure}{%s}{%s}\n\\centering' %
                              (node['align'] == 'right' and 'r' or 'l',
